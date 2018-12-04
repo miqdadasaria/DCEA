@@ -29,8 +29,7 @@ shinyServer(function(input, output) {
   output$baseline_input_vars = renderUI(
     selectInput("input_vars", 
                 "Split data by following dimensions:",
-                setdiff(colnames(raw_baseline_data()),c("START_AGE","END_AGE","POPULATION","MORTALITY_RATE","MORBIDITY_RATE")), 
-                selected = setdiff(colnames(raw_baseline_data()),c("START_AGE","END_AGE","POPULATION","MORTALITY_RATE","MORBIDITY_RATE")), 
+                setdiff(colnames(raw_baseline_data()),c("START_AGE","END_AGE","POPULATION","MORTALITY_RATE","HRQL_SCORE")), 
                 multiple=TRUE)                      
   )
   
@@ -47,7 +46,7 @@ shinyServer(function(input, output) {
                 style = 'bootstrap',
                 rownames = FALSE,
                 colnames = gsub("_"," ",colnames(table)),
-                options = list(pageLength = 18, autoWidth = TRUE, dom='ftrpi')) %>% formatRound(columns=c('MORTALITY_RATE', 'MORBIDITY_RATE'), digits=4)
+                options = list(pageLength = 18, autoWidth = TRUE, dom='ftrpi')) %>% formatRound(columns=c('MORTALITY_RATE', 'HRQL_SCORE'), digits=4)
     })
   })
   
@@ -64,7 +63,7 @@ shinyServer(function(input, output) {
   
   output$baseline_inequality_summary = renderDataTable({
     withProgress(message = 'Loading baseline health distribution data table',{
-      table = inequality_summary(baseline_data())
+      table = inequality_summary(baseline_data(),input$input_vars)
       datatable(table,
                 style = 'bootstrap',
                 rownames = FALSE,

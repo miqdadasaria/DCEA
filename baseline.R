@@ -4,7 +4,7 @@ calculate_qale = function(baseline_data_subgroup){
   qale = baseline_data_subgroup %>% 
     mutate(n=1+END_AGE-START_AGE, a=0.5, M=MORTALITY_RATE, 
            q=n*M/(1+(1-a)*n*M), 
-           l=1, L=n, T=1, e=1, u=MORBIDITY_RATE, Y=1, 
+           l=1, L=n, T=1, e=1, u=HRQL_SCORE, Y=1, 
            N=1,H=1) %>% 
     arrange(START_AGE)
     
@@ -52,17 +52,18 @@ baseline_health_distribution = function(baseline_data, input_vars){
 }
 
 process_baseline_data = function(input_data, input_vars){
-  group_vars = c("START_AGE","END_AGE",input_vars)
-  aggregated_data = input_data %>% 
-    group_by_(.dots=group_vars) %>%
-    summarise( 
-      MORTALITY_RATE=weighted.mean(MORTALITY_RATE,POPULATION),
-      MORBIDITY_RATE=weighted.mean(MORBIDITY_RATE,POPULATION),
-      POPULATION=sum(POPULATION)
-    ) %>%
-    ungroup() %>%
-    select_(.dots=c("START_AGE","END_AGE",input_vars,"POPULATION","MORTALITY_RATE","MORBIDITY_RATE"))
- 
+
+    group_vars = c("START_AGE","END_AGE",input_vars)
+    aggregated_data = input_data %>% 
+      group_by_(.dots=group_vars) %>%
+      summarise( 
+        MORTALITY_RATE=weighted.mean(MORTALITY_RATE,POPULATION),
+        HRQL_SCORE=weighted.mean(HRQL_SCORE,POPULATION),
+        POPULATION=sum(POPULATION)
+      ) %>%
+      ungroup() %>%
+      select_(.dots=c("START_AGE","END_AGE",input_vars,"POPULATION","MORTALITY_RATE","HRQL_SCORE"))
+
   qale_distribution = baseline_health_distribution(aggregated_data, input_vars)
   
   processed_data = inner_join(aggregated_data, qale_distribution) %>%
@@ -73,45 +74,64 @@ process_baseline_data = function(input_data, input_vars){
 }
 
 baseline_health_distribution_plot = function(baseline_qale_distribution, input_vars){
-  graph_data = baseline_qale_distribution %>%
-    filter(START_AGE==0) %>%
-    arrange(QALE) %>%
-    mutate(RIGHT = cumsum(POPULATION),
-           LEFT = RIGHT-POPULATION,
-           RIGHT = RIGHT/sum(POPULATION),
-           LEFT = LEFT/sum(POPULATION)) 
+  graph_data = 
     if(length(input_vars)==0){
-      graph_data = graph_data %>%
-        mutate(LABEL="whole population")
+      baseline_qale_distribution %>%
+      mutate(TOTAL_POPULATION=sum(POPULATION),LABEL="whole population")
     } else {
-      graph_data = graph_data %>%
+      baseline_qale_distribution %>%
+      group_by_(.dots=input_vars) %>%
+      summarise(TOTAL_POPULATION=sum(POPULATION)) %>% 
+      ungroup() %>%
+      right_join(baseline_qale_distribution) %>%
       unite("LABEL",input_vars,sep =":")
-    }
+    } 
   
+  graph_data = graph_data %>%
+      filter(START_AGE==0) %>%
+      arrange(QALE) %>%
+      mutate(RIGHT = cumsum(TOTAL_POPULATION),
+             LEFT = RIGHT-TOTAL_POPULATION,
+             RIGHT = RIGHT/sum(TOTAL_POPULATION),
+             LEFT = LEFT/sum(TOTAL_POPULATION))
+
   plot = ggplot(graph_data, aes(label=LABEL)) +
-    geom_rect(aes(xmin=LEFT, xmax=RIGHT, ymin=0, ymax=QALE), colour="white") +
-    xlab("Proportion of Population (under 5 years of age)") +
+    geom_rect(aes(xmin=LEFT, xmax=RIGHT, ymin=0, ymax=QALE), colour="white", fill="#556B2F") +
+    xlab("Proportion of Population") +
     ylab("Quality Adjusted Life Expectancy at Birth") +
-    geom_text(aes(x=(LEFT+RIGHT)/2, y=QALE/2), angle=90, colour="white") + 
+    geom_text(aes(x=(LEFT+RIGHT)/2, y=QALE/2), angle=90, colour="white", fontface="bold") + 
     theme_bw() + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
           plot.title = element_blank(),
           plot.margin = unit(c(1, 1, 1, 1), "lines"),
-          legend.position="none")
+          legend.position="none",
+          text=element_text(family = "Roboto", colour = "#3e3f3a"))
   
   return(plot)
 }
 
-inequality_summary = function(baseline_qale_distribution){
-  qale_at_birth = baseline_qale_distribution %>%
-    filter(START_AGE==0) %>%
-    arrange(QALE) %>%
-    mutate(RIGHT = cumsum(POPULATION),
-           LEFT = RIGHT-POPULATION,
-           MID = (RIGHT+LEFT)/(2*sum(POPULATION)),
-           POP_FRACTION = POPULATION/sum(POPULATION),
-           POP_QALE = POP_FRACTION * QALE)
+inequality_summary = function(baseline_qale_distribution, input_vars){
+  qale_at_birth = 
+    if(length(input_vars)==0){
+        baseline_qale_distribution %>%
+        mutate(TOTAL_POPULATION=sum(POPULATION))
+      } else {
+        baseline_qale_distribution %>%
+        group_by_(.dots=input_vars) %>%
+        summarise(TOTAL_POPULATION=sum(POPULATION)) %>% 
+        ungroup() %>%
+        right_join(baseline_qale_distribution)
+      }
+  
+  qale_at_birth = qale_at_birth %>%
+      filter(START_AGE==0) %>%
+      arrange(QALE) %>%
+      mutate(RIGHT = cumsum(TOTAL_POPULATION),
+           LEFT = RIGHT-TOTAL_POPULATION,
+           MID = (RIGHT+LEFT)/(2*sum(TOTAL_POPULATION)),
+           POP_FRACTION = TOTAL_POPULATION/sum(TOTAL_POPULATION),
+           POP_QALE = POP_FRACTION * QALE) 
   
   absolutue_gap = max(qale_at_birth$QALE) - min(qale_at_birth$QALE)
   relative_gap = (max(qale_at_birth$QALE) / min(qale_at_birth$QALE)) - 1
@@ -120,11 +140,4 @@ inequality_summary = function(baseline_qale_distribution){
   
   results = data_frame("Indicator" = c("Absolute Gap","Relative Gap","SII","RII"),"Value"=c(absolutue_gap, relative_gap, SII, RII))
   return(results)
-}
-
-test_data = function(){
-  input_data = read_csv("data/england_regions_sample_distribution.csv")
-  input_vars = c("SES","REGION")
-  data = process_baseline_data(input_data, input_vars)
-  return(data)
 }

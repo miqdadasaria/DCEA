@@ -23,8 +23,8 @@ shinyUI(
                           HTML("<small>
                                <p>This application takes input in CSV format containing the age specific mortality, 
                                morbidity and population data split by the population characteristics across 
-                               whish you want to analyse equity. The CSV file must contain five columns named: 
-                               START_AGE, END_AGE, POPULATION, MORTALITY_RATE and MORBIDITY_RATE. Additional columns
+                               wish you want to analyse equity. The CSV file must contain five columns named: 
+                               START_AGE, END_AGE, POPULATION, MORTALITY_RATE and HRQL_SCORE. Additional columns
                                should be added to capture each of the characteristics you want to be able to spilt 
                                the population by.</small>")
                         ),      
