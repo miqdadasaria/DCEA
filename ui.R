@@ -6,7 +6,6 @@
 
 library("shiny")
 library("DT")
-source("baseline.R")
 
 shinyUI(
   navbarPage(theme = "sandstone.css",
@@ -74,8 +73,9 @@ shinyUI(
              
 
              
+             
              ##### Atkinson UI panel ####
-             tabPanel("Evaluate Policies Using Atkinson SWF",
+             tabPanel("Evaluate Using Social Welfare Function",
                       
                       sidebarPanel(
                         h3("Evaluate polcies using SWF"),
@@ -88,12 +88,12 @@ shinyUI(
                                POPULATION, a column for each of the equity relevant characteristics you want to be able 
                                to spilt the analysis by and a column detailing the net health benefits produced by each 
                                policy to be evaluated. The columns containing net health benefits related to each 
-                               policy should be named POLICY_[POLICY_NAME] where [POLICY_NAME] describes the policy
+                               policy should be named POLICY_[POLICY_NAME] where [POLICY_NAME] describes the policy.
                                The first policy listed in the file will be taken as the baseline against which other
                                policies will be compared.</small>")
                           ),      
                         
-                        fileInput('nhb_data_file', 'Choose CSV File',
+                        fileInput('atkinson_nhb_data_file', 'Choose CSV File',
                                   accept=c('text/csv', 
                                            'text/comma-separated-values,
                                            text/plain', 
@@ -115,16 +115,17 @@ shinyUI(
                           )
                           ),
                       mainPanel(
-                        tabsetPanel(id="tabset",
+                        tabsetPanel(id="tabset_atkinson",
                                     tabPanel("Atkinson EDE Plot", plotOutput("atkinson_ede_plot")),
-                                    tabPanel("EDE by Inequality Aversion Tables", div(dataTableOutput("atkinson_ede_table"), style = "font-size:70%")),
+                                    tabPanel("Atkinson EDE Table", div(dataTableOutput("atkinson_ede_table"), style = "font-size:70%")),
+                                    tabPanel("Gini EDE Plot", plotOutput("gini_ede_plot")),
+                                    tabPanel("Gini EDE Table", div(dataTableOutput("gini_ede_table"), style = "font-size:70%")),
                                     tabPanel("Raw input data", div(dataTableOutput("raw_nhb_input_data"), style = "font-size:70%"))
                         )
                         
                       )
-                        ),       
+                        ) ,      
              # end Atkinson UI panel
-             
              ##### notes UI panel ####
              tabPanel("Notes", tags$div(HTML("<p>&nbsp;<p>
                                              

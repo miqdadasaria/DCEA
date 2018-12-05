@@ -3,6 +3,7 @@ library("tidyverse")
 
 source("baseline.R")
 source("atkinson.R")
+source("gini.R")
 
 shinyServer(function(input, output) {
  
@@ -120,4 +121,20 @@ shinyServer(function(input, output) {
     })
   })
   
+  output$gini_ede_table = renderDataTable({
+    withProgress(message = 'Loading Atkinson EDE results table',{
+      table = display_gini_ede_table(nhb_data())
+      datatable(table,
+                style = 'bootstrap',
+                rownames = FALSE,
+                colnames = gsub("_"," ",colnames(table)),
+                options = list(pageLength = 18, autoWidth = TRUE, dom='ftrpi')) 
+    })
+  })
+  
+  output$gini_ede_plot = renderPlot({
+    withProgress(message = paste0('Updating Atkinson EDE plot'),{
+      plot_gini_ede(nhb_data())
+    })
+  })
 })
