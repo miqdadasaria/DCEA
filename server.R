@@ -2,9 +2,11 @@ library("shiny")
 library("tidyverse")
 
 source("baseline.R")
+source("atkinson.R")
 
 shinyServer(function(input, output) {
-  
+ 
+  ##### baseline distribution server functions  ####
   raw_baseline_data = reactive({
     if (is.null(input$baseline_data_file)){
       filename="data/england_regions_sample_distribution.csv"
@@ -69,6 +71,52 @@ shinyServer(function(input, output) {
                 rownames = FALSE,
                 colnames = gsub("_"," ",colnames(table)),
                 options = list(pageLength = 18, autoWidth = TRUE, dom='ftrpi')) %>% formatRound(columns=c("Value"), digits=3)
+    })
+  })
+  
+  ##### baseline distribution server functions  ####
+  nhb_data = reactive({
+    if (is.null(input$nhb_data_file)){
+      filename="data/nrt_net_health_benefits_sample_distribution.csv"
+    } else {
+      filename=input$nhb_data_file$datapath
+    }
+    read_csv(filename)
+  })
+  
+  output$download_sample_nhb_data = downloadHandler(
+    filename = "nrt_net_health_benefits_sample_distribution.csv",
+    content = function(file) {
+      results = read_csv("data/nrt_net_health_benefits_sample_distribution.csv")
+      write_csv(results,file)
+    }
+  )
+  
+  output$raw_nhb_input_data = renderDataTable({
+    withProgress(message = 'Loading raw NHB data table',{
+      table = nhb_data()
+      datatable(table,
+                style = 'bootstrap',
+                rownames = FALSE,
+                colnames = gsub("_"," ",colnames(table)),
+                options = list(pageLength = 18, autoWidth = TRUE, dom='ftrpi')) 
+    })
+  })
+  
+  output$atkinson_ede_table = renderDataTable({
+    withProgress(message = 'Loading Atkinson EDE results table',{
+      table = display_atkinson_ede_table(nhb_data())
+      datatable(table,
+                style = 'bootstrap',
+                rownames = FALSE,
+                colnames = gsub("_"," ",colnames(table)),
+                options = list(pageLength = 18, autoWidth = TRUE, dom='ftrpi')) 
+    })
+  })
+  
+  output$atkinson_ede_plot = renderPlot({
+    withProgress(message = paste0('Updating Atkinson EDE plot'),{
+      plot_atkinson_ede(nhb_data())
     })
   })
   

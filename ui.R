@@ -39,7 +39,7 @@ shinyUI(
                                An example data file for England allowing you to split data by socioeconomic status
                                and region can be downloaded below to help understand the input data format. If no input
                                data file is selected this is the data that is used to generate the default health 
-                               distributions shown here.</small>")
+                               distributions shown here.<p></small>")
                           ),
                         
                         downloadButton("download_sample_data", "Download Sample Dataset in CSV format"),
@@ -73,6 +73,57 @@ shinyUI(
              # end baseline distribution UI panel
              
 
+             
+             ##### Atkinson UI panel ####
+             tabPanel("Evaluate Policies Using Atkinson SWF",
+                      
+                      sidebarPanel(
+                        h3("Evaluate polcies using SWF"),
+                        
+                        tags$div(
+                          HTML("<small>
+                               <p>This application takes input in CSV format containing the net health benefits 
+                               resulting from alternative health policies split by the population characteristics across 
+                               wish you want to analyse equity. The CSV file should contain a column titled 
+                               POPULATION, a column for each of the equity relevant characteristics you want to be able 
+                               to spilt the analysis by and a column detailing the net health benefits produced by each 
+                               policy to be evaluated. The columns containing net health benefits related to each 
+                               policy should be named POLICY_[POLICY_NAME] where [POLICY_NAME] describes the policy
+                               The first policy listed in the file will be taken as the baseline against which other
+                               policies will be compared.</small>")
+                          ),      
+                        
+                        fileInput('nhb_data_file', 'Choose CSV File',
+                                  accept=c('text/csv', 
+                                           'text/comma-separated-values,
+                                           text/plain', 
+                                           '.csv')),
+                        tags$div(
+                          HTML("<small>
+                               An example data file for the NHS nicotine replacement therapy programme allowing you 
+                               to split data by socioeconomic status and region can be downloaded below to help 
+                               understand the input data format. If no input data file is selected this is the data 
+                               that is used to generate the default results shown here.<p></small>")
+                          ),
+                        
+                        downloadButton("download_sample_nhb_data", "Download Sample NHB Dataset in CSV format"),
+                        
+                        tags$div(
+                          HTML("<small><p>
+                               <p>This site was produced by <a href='https://github.com/miqdadasaria'>Miqdad Asaria</a> 
+                               <p>Source code can be found <a href='https://github.com/miqdadasaria/DCEA'>here</a>.</small>")
+                          )
+                          ),
+                      mainPanel(
+                        tabsetPanel(id="tabset",
+                                    tabPanel("Atkinson EDE Plot", plotOutput("atkinson_ede_plot")),
+                                    tabPanel("EDE by Inequality Aversion Tables", div(dataTableOutput("atkinson_ede_table"), style = "font-size:70%")),
+                                    tabPanel("Raw input data", div(dataTableOutput("raw_nhb_input_data"), style = "font-size:70%"))
+                        )
+                        
+                      )
+                        ),       
+             # end Atkinson UI panel
              
              ##### notes UI panel ####
              tabPanel("Notes", tags$div(HTML("<p>&nbsp;<p>
