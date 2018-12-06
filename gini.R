@@ -19,7 +19,7 @@ calculate_extended_gini_ede = function(NHB,POPULATION,e){
 
 calculate_extended_gini_ede_table = function(NHB,POPULATION){
   results = data_frame()
-  for(e in seq(0.5,5,0.5)){
+  for(e in seq(1,5,0.5)){
      results[1,paste("e",e,sep="_")] = calculate_extended_gini_ede(NHB,POPULATION,e)
   }
   return(results)
