@@ -93,7 +93,7 @@ shinyUI(
                                policies will be compared.</small>")
                           ),      
                         
-                        fileInput('atkinson_nhb_data_file', 'Choose CSV File',
+                        fileInput('nhb_data_file', 'Choose CSV File',
                                   accept=c('text/csv', 
                                            'text/comma-separated-values,
                                            text/plain', 
@@ -118,8 +118,8 @@ shinyUI(
                         tabsetPanel(id="tabset_atkinson",
                                     tabPanel("Atkinson EDE Plot", plotOutput("atkinson_ede_plot")),
                                     tabPanel("Atkinson EDE Table", div(dataTableOutput("atkinson_ede_table"), style = "font-size:70%")),
-                                    tabPanel("Gini EDE Plot", plotOutput("gini_ede_plot")),
-                                    tabPanel("Gini EDE Table", div(dataTableOutput("gini_ede_table"), style = "font-size:70%")),
+                                    tabPanel("Extended Gini EDE Plot", plotOutput("gini_ede_plot")),
+                                    tabPanel("Extended Gini EDE Table", div(dataTableOutput("gini_ede_table"), style = "font-size:70%")),
                                     tabPanel("Raw input data", div(dataTableOutput("raw_nhb_input_data"), style = "font-size:70%"))
                         )
                         
