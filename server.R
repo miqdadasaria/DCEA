@@ -137,4 +137,11 @@ shinyServer(function(input, output) {
       plot_ede(nhb_data(),"Extended Gini")
     })
   })
+  
+  output$equity_impact_plane_plot = renderPlot({
+    withProgress(message = paste0('Updating Equity Impact Plane plot'),{
+      plot_equity_impact_plane(nhb_data(),input$index,input$inequity_aversion)
+    })
+  })
+  
 })
