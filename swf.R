@@ -2,6 +2,7 @@ library("tidyverse")
 
 source("gini.R")
 source("atkinson.R")
+source("kolm.R")
 
 calculate_ede_table = function(nhb_data, index){
   results=nhb_data %>% 
@@ -15,6 +16,9 @@ calculate_ede_table = function(nhb_data, index){
   } else if(index=="Atkinson"){
     results = results %>%
       do(calculate_atkinson_ede_table(.$NHB,.$POPULATION))
+  } else if(index=="Kolm"){
+    results = results %>%
+      do(calculate_kolm_ede_table(.$NHB,.$POPULATION))
   } 
   
   results = results %>%
@@ -35,7 +39,10 @@ display_ede_table = function(nhb_data, index){
       mutate('Extended Gini \u03B7'=as.double(e)) 
   } else if(index=="Atkinson"){
     ede_table = ede_table %>%    
-      mutate('Atkinson \u03B5'=as.integer(e))
+      mutate('Atkinson \u03B5'=as.double(e))
+  } else if(index=="Kolm"){
+    ede_table = ede_table %>%    
+      mutate('Kolm \u03B1'=as.double(e))
   } 
   
   ede_table = ede_table %>%
@@ -60,6 +67,8 @@ plot_ede = function(nhb_data, index){
     inequality_aversion = "\u03B7"
   } else if(index=="Atkinson"){
     inequality_aversion = "\u03B5"
+  } else if(index=="Kolm"){
+    inequality_aversion = "\u03B1"
   }
   
   plot = ggplot(graph_data) +
@@ -88,6 +97,9 @@ plot_equity_impact_plane = function(nhb_data, index, e){
   } else if(index=="Atkinson"){
     results = results %>%
         summarise(EDE=calculate_atkinson_ede(NHB,POPULATION,e),NHB=weighted.mean(NHB,POPULATION))
+  } else if(index=="Kolm"){
+    results = results %>%
+      summarise(EDE=calculate_kolm_ede(NHB,POPULATION,e),NHB=weighted.mean(NHB,POPULATION))
   } 
   
   results = results %>%
@@ -103,6 +115,8 @@ plot_equity_impact_plane = function(nhb_data, index, e){
     inequality_aversion = "\u03B7"
   } else if(index=="Atkinson"){
     inequality_aversion = "\u03B5"
+  } else if(index=="Kolm"){
+    inequality_aversion = "\u03B1"
   }
   
   plot = ggplot(results%>%filter(POLICY!=baseline)) +

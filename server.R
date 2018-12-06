@@ -138,6 +138,23 @@ shinyServer(function(input, output) {
     })
   })
   
+  output$kolm_ede_table = renderDataTable({
+    withProgress(message = 'Loading Extended Kolm EDE results table',{
+      table = display_ede_table(nhb_data(),"Kolm")
+      datatable(table,
+                style = 'bootstrap',
+                rownames = FALSE,
+                colnames = gsub("_"," ",colnames(table)),
+                options = list(pageLength = 18, autoWidth = TRUE, dom='ftrpi')) 
+    })
+  })
+  
+  output$kolm_ede_plot = renderPlot({
+    withProgress(message = paste0('Updating Kolm EDE plot'),{
+      plot_ede(nhb_data(),"Kolm")
+    })
+  })
+  
   output$equity_impact_plane_plot = renderPlot({
     withProgress(message = paste0('Updating Equity Impact Plane plot'),{
       plot_equity_impact_plane(nhb_data(),input$index,input$inequity_aversion)

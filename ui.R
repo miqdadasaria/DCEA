@@ -120,10 +120,12 @@ shinyUI(
                                     tabPanel("Atkinson EDE Table", div(dataTableOutput("atkinson_ede_table"), style = "font-size:70%")),
                                     tabPanel("Gini EDE Plot", plotOutput("gini_ede_plot")),
                                     tabPanel("Gini EDE Table", div(dataTableOutput("gini_ede_table"), style = "font-size:70%")),
+                                    tabPanel("Kolm EDE Plot", plotOutput("kolm_ede_plot")),
+                                    tabPanel("Kolm EDE Table", div(dataTableOutput("kolm_ede_table"), style = "font-size:70%")),
                                     tabPanel("Equity Impact Plane", 
                                              plotOutput("equity_impact_plane_plot"),
-                                             selectInput("index", "Social Welfare Function", choices = c("Atkinson","Extended Gini")),
-                                             sliderInput("inequity_aversion", "Inequity aversion parameter", min=0, max=20, value=10, step=0.25)
+                                             selectInput("index", "Social Welfare Function", choices = c("Atkinson","Extended Gini","Kolm")),
+                                             sliderInput("inequity_aversion", "Inequity aversion parameter", min=0, max=15, value=10, step=0.005)
                                              ),
                                     tabPanel("Raw input data", div(dataTableOutput("raw_nhb_input_data"), style = "font-size:70%"))
                         )
