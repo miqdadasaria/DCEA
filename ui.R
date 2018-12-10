@@ -108,6 +108,8 @@ shinyUI(
                         
                         downloadButton("download_sample_nhb_data", "Download Sample NHB Dataset in CSV format"),
                         
+                        uiOutput("baseline_policy_name"),
+                        
                         tags$div(
                           HTML("<small><p>
                                <p>This site was produced by <a href='https://github.com/miqdadasaria'>Miqdad Asaria</a> 

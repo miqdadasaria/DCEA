@@ -4,7 +4,7 @@ source("gini.R")
 source("atkinson.R")
 source("kolm.R")
 
-calculate_ede_table = function(nhb_data, index){
+calculate_ede_table = function(nhb_data, index, baseline){
   results=nhb_data %>% 
     select(POPULATION,starts_with("POLICY_")) %>%
     gather(POLICY,NHB,-POPULATION) %>%
@@ -21,16 +21,20 @@ calculate_ede_table = function(nhb_data, index){
       do(calculate_kolm_ede_table(.$NHB,.$POPULATION))
   } 
   
+  print(baseline)
   results = results %>%
     ungroup() %>%
     mutate(POLICY=gsub("POLICY_","",POLICY),
-           POLICY=gsub("_"," ",POLICY))
+           POLICY=gsub("_"," ",POLICY),
+           r=ifelse(POLICY==baseline,0,1)) %>%
+    arrange(r) %>%
+    select(-r)
   
   return(results)
 }
 
-display_ede_table = function(nhb_data, index){
-  ede_table = calculate_ede_table(nhb_data, index) %>%
+display_ede_table = function(nhb_data, index, baseline){
+  ede_table = calculate_ede_table(nhb_data, index, baseline) %>%
     gather(E,EDE,-POLICY) %>%
     separate(E,c("x","e"),sep="_") 
   
@@ -53,9 +57,8 @@ display_ede_table = function(nhb_data, index){
   return(ede_table)
 }
 
-plot_ede = function(nhb_data, index){
-  graph_data = calculate_ede_table(nhb_data, index)
-  baseline = graph_data[1,1]$POLICY
+plot_ede = function(nhb_data, index, baseline){
+  graph_data = calculate_ede_table(nhb_data, index, baseline)
   diff_data = t(t(graph_data[-1]) - t(graph_data[-1])[,1])
   graph_data = bind_cols(graph_data[,1],as_data_frame(diff_data)) %>%
     filter(POLICY!=baseline) %>%
@@ -73,7 +76,7 @@ plot_ede = function(nhb_data, index){
   
   plot = ggplot(graph_data) +
     geom_line(aes(x=e, y=EDE*sum(nhb_data$POPULATION), group=POLICY, colour=POLICY), size=2) + 
-    ylab(paste(index,"EDE population QALYs compared to",baseline)) +
+    ylab(paste(index,"Population impact in EDE HALYs compared with ",baseline)) +
     xlab(paste0(index," inequity aversion (",inequality_aversion,")")) +
     theme_bw() + 
     theme(panel.grid.major = element_blank(), 
@@ -85,7 +88,7 @@ plot_ede = function(nhb_data, index){
   return(plot)
 }
 
-plot_equity_impact_plane = function(nhb_data, index, e){
+plot_equity_impact_plane = function(nhb_data, index, e, baseline){
   results=nhb_data %>% 
     select(POPULATION,starts_with("POLICY_")) %>%
     gather(POLICY,NHB,-POPULATION) %>%
@@ -105,7 +108,10 @@ plot_equity_impact_plane = function(nhb_data, index, e){
   results = results %>%
     ungroup() %>%
     mutate(POLICY=gsub("POLICY_","",POLICY),
-           POLICY=gsub("_"," ",POLICY))
+           POLICY=gsub("_"," ",POLICY),
+           r=ifelse(POLICY==baseline,0,1)) %>%
+    arrange(r) %>%
+    select(-r)
   
   results$EDE = (results$EDE - results$EDE[1])*sum(nhb_data$POPULATION)
   results$NHB = (results$NHB - results$NHB[1])*sum(nhb_data$POPULATION)
@@ -121,8 +127,8 @@ plot_equity_impact_plane = function(nhb_data, index, e){
   
   plot = ggplot(results%>%filter(POLICY!=baseline)) +
     geom_point(aes(x=EDE, y=NHB, group=POLICY, colour=POLICY), size=3) + 
-    ylab(paste("Health Impact population QALYs incremental to",baseline)) +
-    xlab(paste0("Equity Impact EDE population QALYs incremental to ",baseline," using ",index," index (",inequality_aversion,"=",e,")")) +
+    ylab(paste("Health Impact population HALYs incremental to",baseline)) +
+    xlab(paste0("Equity Impact EDE population HALYs incremental to ",baseline," using ",index," index (",inequality_aversion,"=",e,")")) +
     theme_bw() + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
