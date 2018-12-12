@@ -20,13 +20,14 @@ calculate_ede_table = function(nhb_data, index, baseline){
     results = results %>%
       do(calculate_kolm_ede_table(.$NHB,.$POPULATION))
   } 
-  
-  print(baseline)
+
   results = results %>%
     ungroup() %>%
     mutate(POLICY=gsub("POLICY_","",POLICY),
-           POLICY=gsub("_"," ",POLICY),
-           r=ifelse(POLICY==baseline,0,1)) %>%
+           POLICY=gsub("_"," ",POLICY))
+  
+  results = results %>%
+    mutate(r=ifelse(POLICY==baseline,0,1)) %>%
     arrange(r) %>%
     select(-r)
   
@@ -76,12 +77,13 @@ plot_ede = function(nhb_data, index, baseline){
   
   plot = ggplot(graph_data) +
     geom_line(aes(x=e, y=EDE*sum(nhb_data$POPULATION), group=POLICY, colour=POLICY), size=2) + 
-    ylab(paste(index,"Population impact in EDE HALYs compared with ",baseline)) +
+    ggtitle(paste("Equity weighted NHB compared with",baseline)) +
+    ylab(paste("Equity weighted HALYs")) +
     xlab(paste0(index," inequity aversion (",inequality_aversion,")")) +
     theme_bw() + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
-          plot.title = element_blank(),
+          plot.title = element_text(lineheight=.8, face="bold", hjust=0.5),
           plot.margin = unit(c(1, 1, 1, 1), "lines"),
           text=element_text(family = "Roboto", colour = "#3e3f3a"))
   
@@ -108,12 +110,14 @@ plot_equity_impact_plane = function(nhb_data, index, e, baseline){
   results = results %>%
     ungroup() %>%
     mutate(POLICY=gsub("POLICY_","",POLICY),
-           POLICY=gsub("_"," ",POLICY),
-           r=ifelse(POLICY==baseline,0,1)) %>%
+           POLICY=gsub("_"," ",POLICY))
+  
+  results = results%>%
+    mutate(r=ifelse(POLICY==baseline,0,1)) %>%
     arrange(r) %>%
     select(-r)
   
-  results$EDE = (results$EDE - results$EDE[1])*sum(nhb_data$POPULATION)
+  results$EDE = ((results$EDE-results$NHB) - (results$EDE[1]-results$NHB[1]))*sum(nhb_data$POPULATION)
   results$NHB = (results$NHB - results$NHB[1])*sum(nhb_data$POPULATION)
   baseline = results$POLICY[1]
   
@@ -127,12 +131,13 @@ plot_equity_impact_plane = function(nhb_data, index, e, baseline){
   
   plot = ggplot(results%>%filter(POLICY!=baseline)) +
     geom_point(aes(x=EDE, y=NHB, group=POLICY, colour=POLICY), size=3) + 
-    ylab(paste("Health Impact population HALYs incremental to",baseline)) +
-    xlab(paste0("Equity Impact EDE population HALYs incremental to ",baseline," using ",index," index (",inequality_aversion,"=",e,")")) +
+    ggtitle(paste("Health equity impact plane compared with",baseline)) +
+    ylab(paste("Health Impact (HALYs)")) +
+    xlab(paste0("Equity Impact (HALYs weighted using ",index," index ",inequality_aversion,"=",e,")")) +
     theme_bw() + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
-          plot.title = element_blank(),
+          plot.title = element_text(lineheight=.8, face="bold", hjust=0.5),
           plot.margin = unit(c(1, 1, 1, 1), "lines"),
           text=element_text(family = "Roboto", colour = "#3e3f3a"))
   
