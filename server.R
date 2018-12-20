@@ -3,6 +3,7 @@ library("tidyverse")
 
 source("baseline.R")
 source("swf.R")
+source("intervention.R")
 
 
 shinyServer(function(input, output) {
@@ -74,6 +75,61 @@ shinyServer(function(input, output) {
                 options = list(pageLength = 18, autoWidth = TRUE, dom='ftrpi')) %>% formatRound(columns=c("Value"), digits=3)
     })
   })
+  
+  
+  ##### intervention distribution server functions  ####
+  raw_intervention_data = reactive({
+    if (is.null(input$intervention_data_file)){
+      filename="data/nrt_net_health_benefits_universal_distribution.csv"
+    } else {
+      filename=input$intervention_data_file$datapath
+    }
+    read_csv(filename)
+  })
+  
+  output$download_sample_intervention_data = downloadHandler(
+    filename = "nrt_net_health_benefits_universal_distribution.csv",
+    content = function(file) {
+      results = read_csv("data/nrt_net_health_benefits_universal_distribution.csv")
+      write_csv(results,file)
+    }
+  )
+  
+  output$intervention_plot = renderPlot({
+    withProgress(message = paste0('Updating intervention distribution plot'),{
+      plot_intervention(raw_intervention_data(), input$total_intervention_cost, input$marginal_productivity_health, input$opportunity_cost_scenario)
+    })
+  })
+  
+  output$raw_intervention_input_data = renderDataTable({
+    withProgress(message = 'Loading raw intervention data table',{
+      table = raw_intervention_data()
+      datatable(table,
+                style = 'bootstrap',
+                rownames = FALSE,
+                colnames = gsub("_"," ",colnames(table)),
+                options = list(pageLength = 18, autoWidth = TRUE, dom='ftrpi')) 
+    })
+  })
+  
+  output$intervention_health_dist = renderDataTable({
+    withProgress(message = 'Loading intervention health distribution table',{
+      table = calculate_post_intervention_distribution(raw_intervention_data(), input$total_intervention_cost, input$marginal_productivity_health, input$opportunity_cost_scenario)
+      datatable(table,
+                style = 'bootstrap',
+                rownames = FALSE,
+                colnames = gsub("_"," ",colnames(table)),
+                options = list(pageLength = 18, autoWidth = TRUE, dom='ftrpi')) 
+    })
+  })
+  
+  output$download_post_intervention_data = downloadHandler(
+    filename = "post_intervention_health_distribution.csv",
+    content = function(file) {
+      results = calculate_post_intervention_distribution(raw_intervention_data(), input$total_intervention_cost, input$marginal_productivity_health, input$opportunity_cost_scenario)
+      write_csv(results,file)
+    }
+  )
   
   ##### social welfare function server functions  ####
   nhb_data = reactive({

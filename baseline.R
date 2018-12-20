@@ -98,7 +98,7 @@ baseline_health_distribution_plot = function(baseline_qale_distribution, input_v
   plot = ggplot(graph_data, aes(label=LABEL)) +
     geom_rect(aes(xmin=LEFT, xmax=RIGHT, ymin=0, ymax=QALE), colour="white", fill="#556B2F") +
     xlab("Proportion of Population") +
-    ylab("Quality Adjusted Life Expectancy at Birth") +
+    ylab("Health Adjusted Life Expectancy at Birth") +
     geom_text(aes(x=(LEFT+RIGHT)/2, y=QALE/2), angle=90, colour="white", fontface="bold") + 
     theme_bw() + 
     theme(panel.grid.major = element_blank(), 
