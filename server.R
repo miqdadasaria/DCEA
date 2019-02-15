@@ -160,15 +160,15 @@ shinyServer(function(input, output) {
     })
   })
   
-  output$baseline_policy_name = renderUI(
-    selectInput("baseline_policy", 
-                "Set baseline policy to:",
-                gsub("_"," ",gsub("POLICY_","",colnames(nhb_data()%>%select(starts_with("POLICY"))))))                      
+  output$baseline_decision_name = renderUI(
+    selectInput("baseline_decision", 
+                "Set baseline decision to:",
+                gsub("_"," ",gsub("DECISION_","",colnames(nhb_data()%>%select(starts_with("DECISION"))))))                      
   )
   
   output$atkinson_ede_table = renderDataTable({
     withProgress(message = 'Loading Atkinson EDE results table',{
-      table = display_ede_table(nhb_data(),"Atkinson",input$baseline_policy)
+      table = display_ede_table(nhb_data(),"Atkinson",input$baseline_decision)
       datatable(table,
                 style = 'bootstrap',
                 rownames = FALSE,
@@ -179,13 +179,13 @@ shinyServer(function(input, output) {
   
   output$atkinson_ede_plot = renderPlot({
     withProgress(message = paste0('Updating Atkinson EDE plot'),{
-      plot_ede(nhb_data(),"Atkinson",input$baseline_policy)
+      plot_ede(nhb_data(),"Atkinson",input$baseline_decision)
     })
   })
   
   output$gini_ede_table = renderDataTable({
     withProgress(message = 'Loading Extended Gini EDE results table',{
-      table = display_ede_table(nhb_data(),"Extended Gini",input$baseline_policy)
+      table = display_ede_table(nhb_data(),"Extended Gini",input$baseline_decision)
       datatable(table,
                 style = 'bootstrap',
                 rownames = FALSE,
@@ -196,13 +196,13 @@ shinyServer(function(input, output) {
   
   output$gini_ede_plot = renderPlot({
     withProgress(message = paste0('Updating Extended Gini EDE plot'),{
-      plot_ede(nhb_data(),"Extended Gini",input$baseline_policy)
+      plot_ede(nhb_data(),"Extended Gini",input$baseline_decision)
     })
   })
   
   output$kolm_ede_table = renderDataTable({
     withProgress(message = 'Loading Extended Kolm EDE results table',{
-      table = display_ede_table(nhb_data(),"Kolm",input$baseline_policy)
+      table = display_ede_table(nhb_data(),"Kolm",input$baseline_decision)
       datatable(table,
                 style = 'bootstrap',
                 rownames = FALSE,
@@ -213,13 +213,13 @@ shinyServer(function(input, output) {
   
   output$kolm_ede_plot = renderPlot({
     withProgress(message = paste0('Updating Kolm EDE plot'),{
-      plot_ede(nhb_data(),"Kolm",input$baseline_policy)
+      plot_ede(nhb_data(),"Kolm",input$baseline_decision)
     })
   })
   
   output$equity_impact_plane_plot = renderPlot({
     withProgress(message = paste0('Updating Equity Impact Plane plot'),{
-      plot_equity_impact_plane(nhb_data(),input$index,input$inequity_aversion,input$baseline_policy)
+      plot_equity_impact_plane(nhb_data(),input$index,input$inequity_aversion,input$baseline_decision)
     })
   })
   

@@ -140,19 +140,19 @@ shinyUI(
              tabPanel("Evaluate Using Social Welfare Function",
                       
                       sidebarPanel(
-                        h3("Evaluate polcies using SWF"),
+                        h3("Evaluate decisions using SWF"),
                         
                         tags$div(
                           HTML("<small>
                                <p>This application takes input in CSV format containing the net health benefits 
-                               resulting from alternative health policies split by the population characteristics across 
+                               resulting from alternative health decisions split by the population characteristics across 
                                wish you want to analyse equity. The CSV file should contain a column titled 
                                POPULATION, a column for each of the equity relevant characteristics you want to be able 
                                to spilt the analysis by and a column detailing the net health benefits produced by each 
-                               policy to be evaluated. The columns containing net health benefits related to each 
-                               policy should be named POLICY_[POLICY_NAME] where [POLICY_NAME] describes the policy.
-                               The first policy listed in the file will be taken as the baseline against which other
-                               policies will be compared.</small>")
+                               decision to be evaluated. The columns containing net health benefits related to each 
+                               decision should be named DECISION_[DECISION_NAME] where [DECISION_NAME] describes the decision.
+                               The first decision listed in the file will be taken as the baseline against which other
+                               decisions will be compared.</small>")
                           ),      
                         
                         fileInput('nhb_data_file', 'Choose CSV File',
@@ -170,7 +170,7 @@ shinyUI(
                         
                         downloadButton("download_sample_nhb_data", "Download Sample NHB Dataset in CSV format"),
                         
-                        uiOutput("baseline_policy_name"),
+                        uiOutput("baseline_decision_name"),
                         
                         tags$div(
                           HTML("<small><p>
@@ -180,16 +180,38 @@ shinyUI(
                           ),
                       mainPanel(
                         tabsetPanel(id="tabset_atkinson",
-                                    tabPanel("Atkinson EDE Plot", plotOutput("atkinson_ede_plot")),
+                                    tabPanel("Atkinson EDE Plot", plotOutput("atkinson_ede_plot"), 
+                                             HTML("<small><ol><li>The equally distributed equivalent (EDE) plot is a way of assessing trade-offs between efficiency and equity by determining the degree of concern for equity (\"inequity aversion\") required to consider one decision better than another.</li>
+                                                          <li>The point at which two lines cross shows the inequity aversion value required to consider one decision better than another, and the x-axis intercept shows the inequity aversion value required to consider that decision better than the baseline comparator decision.</li>
+                                                          <li>The y-axis intercept shows the efficiency impact of the decision i.e. net health benefit (NHB) in health-adjusted life-years (HALYs).  When the inequity aversion parameter is zero, equity-weighted NHB is the same as unweighted NHB.</li>
+                                                          <li>The equity impact of the decision is equity-weighted NHB minus unweighted NHB.  Equity-improving decisions (compared with the baseline) have an upward slope, since the equity improvement is valued more highly as inequity aversion increases; and equity-harming decisions have a downward slope.</li>
+                                                          <li>Equity-weighted NHB is measured in terms of equity-weighted HALYs that have been standardised to make them comparable with ordinary HALYs. An equity-weighted HALY score of 1 represents a HALY that is equally distributed between all equity-relevant population groups.  An unequally distributed HALY can then be given a score above 1 if it reduces inequality and below 1 if it increases inequality, with the size of the differential depending on the value of the inequity aversion parameter.</li>
+                                                          </ol></small>")),
                                     tabPanel("Atkinson EDE Table", div(dataTableOutput("atkinson_ede_table"), style = "font-size:70%")),
-                                    tabPanel("Gini EDE Plot", plotOutput("gini_ede_plot")),
+                                    tabPanel("Gini EDE Plot", plotOutput("gini_ede_plot"), 
+                                             HTML("<small><ol><li>The equally distributed equivalent (EDE) plot is a way of assessing trade-offs between efficiency and equity by determining the degree of concern for equity (\"inequity aversion\") required to consider one decision better than another.</li>
+                                                  <li>The point at which two lines cross shows the inequity aversion value required to consider one decision better than another, and the x-axis intercept shows the inequity aversion value required to consider that decision better than the baseline comparator decision.</li>
+                                                  <li>The y-axis intercept shows the efficiency impact of the decision i.e. net health benefit (NHB) in health-adjusted life-years (HALYs).  When the inequity aversion parameter is zero, equity-weighted NHB is the same as unweighted NHB.</li>
+                                                  <li>The equity impact of the decision is equity-weighted NHB minus unweighted NHB.  Equity-improving decisions (compared with the baseline) have an upward slope, since the equity improvement is valued more highly as inequity aversion increases; and equity-harming decisions have a downward slope.</li>
+                                                  <li>Equity-weighted NHB is measured in terms of equity-weighted HALYs that have been standardised to make them comparable with ordinary HALYs. An equity-weighted HALY score of 1 represents a HALY that is equally distributed between all equity-relevant population groups.  An unequally distributed HALY can then be given a score above 1 if it reduces inequality and below 1 if it increases inequality, with the size of the differential depending on the value of the inequity aversion parameter.</li>
+                                                  </ol></small>")),
                                     tabPanel("Gini EDE Table", div(dataTableOutput("gini_ede_table"), style = "font-size:70%")),
-                                    tabPanel("Kolm EDE Plot", plotOutput("kolm_ede_plot")),
+                                    tabPanel("Kolm EDE Plot", plotOutput("kolm_ede_plot"), 
+                                             HTML("<small><ol><li>The equally distributed equivalent (EDE) plot is a way of assessing trade-offs between efficiency and equity by determining the degree of concern for equity (\"inequity aversion\") required to consider one decision better than another.</li>
+                                                  <li>The point at which two lines cross shows the inequity aversion value required to consider one decision better than another, and the x-axis intercept shows the inequity aversion value required to consider that decision better than the baseline comparator decision.</li>
+                                                  <li>The y-axis intercept shows the efficiency impact of the decision i.e. net health benefit (NHB) in health-adjusted life-years (HALYs).  When the inequity aversion parameter is zero, equity-weighted NHB is the same as unweighted NHB.</li>
+                                                  <li>The equity impact of the decision is equity-weighted NHB minus unweighted NHB.  Equity-improving decisions (compared with the baseline) have an upward slope, since the equity improvement is valued more highly as inequity aversion increases; and equity-harming decisions have a downward slope.</li>
+                                                  <li>Equity-weighted NHB is measured in terms of equity-weighted HALYs that have been standardised to make them comparable with ordinary HALYs. An equity-weighted HALY score of 1 represents a HALY that is equally distributed between all equity-relevant population groups.  An unequally distributed HALY can then be given a score above 1 if it reduces inequality and below 1 if it increases inequality, with the size of the differential depending on the value of the inequity aversion parameter.</li>
+                                                  </ol></small>")),
                                     tabPanel("Kolm EDE Table", div(dataTableOutput("kolm_ede_table"), style = "font-size:70%")),
                                     tabPanel("Equity Impact Plane", 
                                              plotOutput("equity_impact_plane_plot"),
                                              selectInput("index", "Social Welfare Function", choices = c("Atkinson","Extended Gini","Kolm")),
-                                             sliderInput("inequity_aversion", "Inequity aversion parameter", min=0, max=15, value=10, step=0.005)
+                                             sliderInput("inequity_aversion", "Inequity aversion parameter", min=0, max=15, value=10, step=0.005),
+                                             HTML("<small><ol><li>The equity impact plane is a way of visualising trade-offs between efficiency impact (on the y-axis) and equity impact (on the x-axis).  The value of the equity impact depends on the chosen value of the inequity aversion parameter.</li>
+                                                  <li>This version of the plane measures both efficiency and equity impact in comparable units of population-level health-adjusted life-years (HALYs).  This allows decisions to be compared using a simple, fixed 135 degree equity indifference line. Points to the right of the line are better than the decision in question, and points to the left are worse.  The higher the inequity aversion parameter, the greater the value of the equity impact.</li>
+                                                  <li>Efficiency impact is unweighted net health benefit (NHB).  Equity impact is equity-weighted NHB minus unweighted NHB.</li<
+                                                  </ol></small>")
                                              ),
                                     tabPanel("Raw input data", div(dataTableOutput("raw_nhb_input_data"), style = "font-size:70%"))
                         )

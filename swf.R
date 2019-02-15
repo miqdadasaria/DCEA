@@ -6,9 +6,9 @@ source("kolm.R")
 
 calculate_ede_table = function(nhb_data, index, baseline){
   results=nhb_data %>% 
-    select(POPULATION,starts_with("POLICY_")) %>%
-    gather(POLICY,NHB,-POPULATION) %>%
-    group_by(POLICY) 
+    select(POPULATION,starts_with("DECISION_")) %>%
+    gather(DECISION,NHB,-POPULATION) %>%
+    group_by(DECISION) 
   
   if(index=="Extended Gini"){
     results = results %>%
@@ -23,11 +23,11 @@ calculate_ede_table = function(nhb_data, index, baseline){
 
   results = results %>%
     ungroup() %>%
-    mutate(POLICY=gsub("POLICY_","",POLICY),
-           POLICY=gsub("_"," ",POLICY))
+    mutate(DECISION=gsub("DECISION_","",DECISION),
+           DECISION=gsub("_"," ",DECISION))
   
   results = results %>%
-    mutate(r=ifelse(POLICY==baseline,0,1)) %>%
+    mutate(r=ifelse(DECISION==baseline,0,1)) %>%
     arrange(r) %>%
     select(-r)
   
@@ -36,8 +36,10 @@ calculate_ede_table = function(nhb_data, index, baseline){
 
 display_ede_table = function(nhb_data, index, baseline){
   ede_table = calculate_ede_table(nhb_data, index, baseline) %>%
-    gather(E,EDE,-POLICY) %>%
+    gather(E,EDE,-DECISION) %>%
     separate(E,c("x","e"),sep="_") 
+  
+  total_population = sum(nhb_data$POPULATION)
   
   if(index=="Extended Gini"){
     ede_table = ede_table %>%
@@ -52,8 +54,8 @@ display_ede_table = function(nhb_data, index, baseline){
   
   ede_table = ede_table %>%
     select(-c(x,e)) %>%
-    mutate(EDE=round(EDE,6)) %>%
-    spread(POLICY,EDE)
+    mutate(EDE=round(EDE*total_population,0)) %>%
+    spread(DECISION,EDE)
   
   return(ede_table)
 }
@@ -62,8 +64,8 @@ plot_ede = function(nhb_data, index, baseline){
   graph_data = calculate_ede_table(nhb_data, index, baseline)
   diff_data = t(t(graph_data[-1]) - t(graph_data[-1])[,1])
   graph_data = bind_cols(graph_data[,1],as_data_frame(diff_data)) %>%
-    filter(POLICY!=baseline) %>%
-    gather(E,EDE,-POLICY) %>%
+    filter(DECISION!=baseline) %>%
+    gather(E,EDE,-DECISION) %>%
     separate(E,c("x","e"),sep="_") %>%
     mutate(e=as.double(e))
   
@@ -76,7 +78,7 @@ plot_ede = function(nhb_data, index, baseline){
   }
   
   plot = ggplot(graph_data) +
-    geom_line(aes(x=e, y=EDE*sum(nhb_data$POPULATION), group=POLICY, colour=POLICY), size=2) + 
+    geom_line(aes(x=e, y=EDE*sum(nhb_data$POPULATION), group=DECISION, colour=DECISION), size=2) + 
     ggtitle(paste("Equity weighted NHB compared with",baseline)) +
     ylab(paste("Equity weighted HALYs")) +
     xlab(paste0(index," inequity aversion (",inequality_aversion,")")) +
@@ -92,9 +94,9 @@ plot_ede = function(nhb_data, index, baseline){
 
 plot_equity_impact_plane = function(nhb_data, index, e, baseline){
   results=nhb_data %>% 
-    select(POPULATION,starts_with("POLICY_")) %>%
-    gather(POLICY,NHB,-POPULATION) %>%
-    group_by(POLICY) 
+    select(POPULATION,starts_with("DECISION_")) %>%
+    gather(DECISION,NHB,-POPULATION) %>%
+    group_by(DECISION) 
   
   if(index=="Extended Gini"){
     results = results %>%
@@ -109,17 +111,17 @@ plot_equity_impact_plane = function(nhb_data, index, e, baseline){
   
   results = results %>%
     ungroup() %>%
-    mutate(POLICY=gsub("POLICY_","",POLICY),
-           POLICY=gsub("_"," ",POLICY))
+    mutate(DECISION=gsub("DECISION_","",DECISION),
+           DECISION=gsub("_"," ",DECISION))
   
   results = results%>%
-    mutate(r=ifelse(POLICY==baseline,0,1)) %>%
+    mutate(r=ifelse(DECISION==baseline,0,1)) %>%
     arrange(r) %>%
     select(-r)
   
   results$EDE = ((results$EDE-results$NHB) - (results$EDE[1]-results$NHB[1]))*sum(nhb_data$POPULATION)
   results$NHB = (results$NHB - results$NHB[1])*sum(nhb_data$POPULATION)
-  baseline = results$POLICY[1]
+  baseline = results$DECISION[1]
   
   if(index=="Extended Gini"){
     inequality_aversion = "\u03B7"
@@ -129,11 +131,18 @@ plot_equity_impact_plane = function(nhb_data, index, e, baseline){
     inequality_aversion = "\u03B1"
   }
   
-  plot = ggplot(results%>%filter(POLICY!=baseline)) +
-    geom_point(aes(x=EDE, y=NHB, group=POLICY, colour=POLICY), size=3) + 
+  maximum = max(abs(c(results$EDE,results$NHB)))
+  
+  plot = ggplot(results%>%filter(DECISION!=baseline)) +
+    geom_point(aes(x=EDE, y=NHB, group=DECISION, colour=DECISION), size=3) +
+    geom_vline(xintercept=0, colour="grey") +
+    geom_hline(yintercept=0, colour="grey") +
+    geom_abline(intercept=0, slope=1, linetype = "dashed") +
     ggtitle(paste("Health equity impact plane compared with",baseline)) +
     ylab(paste("Health Impact (HALYs)")) +
     xlab(paste0("Equity Impact (HALYs weighted using ",index," index ",inequality_aversion,"=",e,")")) +
+    xlim(-1*maximum,maximum) +
+    ylim(-1*maximum,maximum) +
     theme_bw() + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
