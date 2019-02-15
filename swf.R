@@ -137,7 +137,7 @@ plot_equity_impact_plane = function(nhb_data, index, e, baseline){
     geom_point(aes(x=EDE, y=NHB, group=DECISION, colour=DECISION), size=3) +
     geom_vline(xintercept=0, colour="grey") +
     geom_hline(yintercept=0, colour="grey") +
-    geom_abline(intercept=0, slope=1, linetype = "dashed") +
+    geom_abline(intercept=0, slope=-1, linetype = "dashed") +
     ggtitle(paste("Health equity impact plane compared with",baseline)) +
     ylab(paste("Health Impact (HALYs)")) +
     xlab(paste0("Equity Impact (HALYs weighted using ",index," index ",inequality_aversion,"=",e,")")) +
