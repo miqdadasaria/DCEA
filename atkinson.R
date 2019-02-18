@@ -11,7 +11,7 @@ calculate_atkinson_ede = function(NHB,POPULATION,e){
 
 calculate_atkinson_ede_table = function(NHB,POPULATION){
   results = data_frame()
-  for(e in seq(0,20,2)){
+  for(e in seq(0,15,1)){
     results[1,paste("e",e,sep="_")] = calculate_atkinson_ede(NHB,POPULATION,e)
   }
   return(results)

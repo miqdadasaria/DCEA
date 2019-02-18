@@ -191,7 +191,7 @@ shinyUI(
                                     tabPanel("Gini EDE Plot", plotOutput("gini_ede_plot"), 
                                              HTML("<small><ol><li>The equally distributed equivalent (EDE) plot is a way of assessing trade-offs between efficiency and equity by determining the degree of concern for equity (\"inequity aversion\") required to consider one decision better than another.</li>
                                                   <li>The point at which two lines cross shows the inequity aversion value required to consider one decision better than another, and the x-axis intercept shows the inequity aversion value required to consider that decision better than the baseline comparator decision.</li>
-                                                  <li>The y-axis intercept shows the efficiency impact of the decision i.e. net health benefit (NHB) in health-adjusted life-years (HALYs).  When the inequity aversion parameter is zero, equity-weighted NHB is the same as unweighted NHB.</li>
+                                                  <li>The y-axis intercept shows the efficiency impact of the decision i.e. net health benefit (NHB) in health-adjusted life-years (HALYs).  When the inequity aversion parameter is one, equity-weighted NHB is the same as unweighted NHB.</li>
                                                   <li>The equity impact of the decision is equity-weighted NHB minus unweighted NHB.  Equity-improving decisions (compared with the baseline) have an upward slope, since the equity improvement is valued more highly as inequity aversion increases; and equity-harming decisions have a downward slope.</li>
                                                   <li>Equity-weighted NHB is measured in terms of equity-weighted HALYs that have been standardised to make them comparable with ordinary HALYs. An equity-weighted HALY score of 1 represents a HALY that is equally distributed between all equity-relevant population groups.  An unequally distributed HALY can then be given a score above 1 if it reduces inequality and below 1 if it increases inequality, with the size of the differential depending on the value of the inequity aversion parameter.</li>
                                                   </ol></small>")),
@@ -209,7 +209,7 @@ shinyUI(
                                              selectInput("index", "Social Welfare Function", choices = c("Atkinson","Extended Gini","Kolm")),
                                              sliderInput("inequity_aversion", "Inequity aversion parameter", min=0, max=15, value=10, step=0.005),
                                              HTML("<small><ol><li>The equity impact plane is a way of visualising trade-offs between efficiency impact (on the y-axis) and equity impact (on the x-axis).  The value of the equity impact depends on the chosen value of the inequity aversion parameter.</li>
-                                                  <li>This version of the plane measures both efficiency and equity impact in comparable units of population-level health-adjusted life-years (HALYs).  This allows decisions to be compared using a simple, fixed 135 degree equity indifference line. Points to the right of the line are better than the decision in question, and points to the left are worse.  The higher the inequity aversion parameter, the greater the value of the equity impact.</li>
+                                                  <li>This version of the plane measures both efficiency and equity impact in comparable units of population-level health-adjusted life-years (HALYs).  This allows decisions to be compared using a simple, fixed 135 degree equity indifference line. Points to the right of the line are better than the baseline decision, and points to the left are worse.  The higher the inequity aversion parameter, the greater the value of the equity impact.</li>
                                                   <li>Efficiency impact is unweighted net health benefit (NHB).  Equity impact is equity-weighted NHB minus unweighted NHB.</li<
                                                   </ol></small>")
                                              ),
@@ -224,11 +224,11 @@ shinyUI(
                                              
                                              <dl class='dl-horizontal'>
                                              <dt>Baseline distribution</dt> 
-                                             <dd>blah, blah, blah...</dd>
+                                             <dd></dd>
                                              <p>
                                              
                                              <dt>Atkinson index</dt>
-                                             <dd>blah, blah, blah...</dd>
+                                             <dd></dd>
                                              <p>
                                              </dl>"))
                       

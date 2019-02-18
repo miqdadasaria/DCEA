@@ -11,7 +11,7 @@ calculate_kolm_ede = function(NHB,POPULATION,e){
 
 calculate_kolm_ede_table = function(NHB,POPULATION){
   results = data_frame()
-  for(e in seq(0.0,0.125,0.0125)){
+  for(e in seq(0.0,0.2,0.02)){
     results[1,paste("e",e,sep="_")] = calculate_kolm_ede(NHB,POPULATION,e)
   }
   return(results)

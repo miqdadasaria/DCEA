@@ -82,6 +82,7 @@ plot_ede = function(nhb_data, index, baseline){
     ggtitle(paste("Equity weighted NHB compared with",baseline)) +
     ylab(paste("Equity weighted HALYs")) +
     xlab(paste0(index," inequity aversion (",inequality_aversion,")")) +
+    geom_hline(yintercept=0, colour="darkgrey") +
     theme_bw() + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
