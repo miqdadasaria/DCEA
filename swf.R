@@ -4,6 +4,124 @@ source("gini.R")
 source("atkinson.R")
 source("kolm.R")
 
+so_gen_lorenz_dominance = function(lorenz_data){
+  zeros = rep(0,ncol(lorenz_data))
+  names(zeros) = names(lorenz_data)
+  data = bind_rows(zeros,lorenz_data)
+  data$cum_baseline = 0
+  data$cum_intervention = 0
+  
+  if(nrow(data)>1){
+    for (i in 2:nrow(data)) {
+      cum_baseline = 0
+      cum_intervention = 0
+      for (j in 2:i) {
+        cum_baseline = cum_baseline +data$baseline[j]*(data$POPULATION[i]-data$POPULATION[j-1])
+        cum_intervention = cum_intervention +data$intervention[j]*(data$POPULATION[i]-data$POPULATION[j-1])
+      }
+      data$cum_baseline[i]=cum_baseline
+      data$cum_intervention[i]=cum_intervention
+    }
+  }
+  results = data %>% mutate(baseline=cum_baseline, intervention=cum_intervention) %>% select(-cum_baseline,-cum_intervention) %>% filter(POPULATION>0)
+  return(results)
+}
+
+calculate_dominance_table = function(dominace_data){
+  
+  baseline = colnames(dominace_data)[2]
+  intervention = colnames(dominace_data)[3]
+  
+  paraeto_dominance = suppressWarnings(
+      dominace_data %>% 
+      mutate(PARAETO = ifelse(.data[[baseline]]>.data[[intervention]],0,ifelse(.data[[intervention]]>.data[[baseline]],1,NA))) %>% 
+      summarise(minimum=min(PARAETO,na.rm=TRUE),maximum=max(PARAETO,na.rm=TRUE)) %>%
+      mutate(result=if(!is.infinite(minimum)){minimum+maximum}else{NA}, paraeto_dominance=if(is.na(result) | result==1){"No Dominance"} else if(result==2){"Dominates"} else{"Dominanted"}) %>%
+      select(paraeto_dominance)) 
+  
+  total_population = sum(dominace_data$POPULATION)
+  mean_health_baseline = weighted.mean(dominace_data[[baseline]],dominace_data$POPULATION)
+  mean_health_intervention = weighted.mean(dominace_data[[intervention]],dominace_data$POPULATION)
+  lorenz_dominance = suppressWarnings(
+    dominace_data %>% 
+    arrange(.data[[baseline]]) %>% 
+    mutate(
+           POPULATION=POPULATION/total_population,
+           baseline = .data[[baseline]] * POPULATION / mean_health_baseline,
+           baseline = cumsum(baseline),
+           intervention = .data[[intervention]] * POPULATION / mean_health_intervention,
+           intervention = cumsum(intervention),
+           POPULATION=cumsum(POPULATION),
+           LORENZ = ifelse(baseline>intervention,0,ifelse(intervention>baseline,1,NA))
+           ) %>%
+    summarise(minimum=min(LORENZ,na.rm=TRUE),maximum=max(LORENZ,na.rm=TRUE)) %>%
+    mutate(result=if(!is.infinite(minimum)){minimum+maximum}else{NA}, lorenz_dominance=if(is.na(result) | result==1){"No Dominance"} else if(result==2){"Dominates"} else{"Dominanted"}) %>%
+    select(lorenz_dominance))
+  
+  gen_lorenz_dominance = suppressWarnings(
+    dominace_data %>% 
+    arrange(.data[[baseline]]) %>% 
+    mutate(
+      POPULATION=POPULATION/total_population,
+      baseline = .data[[baseline]] * POPULATION,
+      baseline = cumsum(baseline),
+      intervention = .data[[intervention]] * POPULATION,
+      intervention = cumsum(intervention),
+      POPULATION=cumsum(POPULATION),
+      GEN_LORENZ = ifelse(baseline>intervention,0,ifelse(intervention>baseline,1,NA))
+    ) %>%
+    summarise(minimum=min(GEN_LORENZ,na.rm=TRUE),maximum=max(GEN_LORENZ,na.rm=TRUE)) %>%
+    mutate(result=if(!is.infinite(minimum)){minimum+maximum}else{NA}, gen_lorenz_dominance=if(is.na(result) | result==1){"No Dominance"} else if(result==2){"Dominates"} else{"Dominanted"}) %>%
+    select(gen_lorenz_dominance))
+  
+  so_gen_lorenz_dominance = suppressWarnings(dominace_data %>% 
+                                            arrange(.data[[baseline]]) %>% 
+                                            mutate(
+                                              POPULATION=POPULATION/total_population,
+                                              baseline = .data[[baseline]] * POPULATION,
+                                              intervention = .data[[intervention]] * POPULATION,
+                                              POPULATION=cumsum(POPULATION)) %>%
+                                              so_gen_lorenz_dominance() %>%
+                                              mutate(SO_GEN_LORENZ = ifelse(baseline>intervention,0,ifelse(intervention>baseline,1,NA))) %>%
+                                            summarise(minimum=min(SO_GEN_LORENZ,na.rm=TRUE),maximum=max(SO_GEN_LORENZ,na.rm=TRUE)) %>%
+                                            mutate(result=if(!is.infinite(minimum)){minimum+maximum}else{NA}, so_gen_lorenz_dominance=if(is.na(result) | result==1){"No Dominance"} else if(result==2){"Dominates"} else{"Dominanted"}) %>%
+                                            select(so_gen_lorenz_dominance))
+  
+  results = bind_cols(
+        paraeto_dominance,
+         lorenz_dominance,
+         gen_lorenz_dominance,
+         so_gen_lorenz_dominance) %>% 
+    mutate(intervention=intervention) %>%
+    select(`Decision Option`=intervention,
+            Pareto=paraeto_dominance,
+            Lorenz=lorenz_dominance,
+            `Generalized Lorenz`=gen_lorenz_dominance,
+            `Second Order Generalized Lorenz`=so_gen_lorenz_dominance)
+  
+  return(results)
+}
+
+display_dominance_table = function(nhb_data, baseline){
+  
+  data = nhb_data %>% select("POPULATION",starts_with("DECISION"))
+  names(data) = gsub("_"," ",gsub("DECISION_","",names(data)))
+  
+  results_list = list()
+  
+  for (decision in seq_along(data)) {
+    dominace_data = data %>% select("POPULATION",baseline,decision)
+    if (ncol(dominace_data)==3) {
+      results_list[[paste0("decision:",decision)]] = calculate_dominance_table(dominace_data)
+    }
+  }
+  
+  results = bind_rows(results_list)
+  
+  return(results)
+}
+
+
 calculate_ede_table = function(nhb_data, index, baseline){
   results=nhb_data %>% 
     select(POPULATION,starts_with("DECISION_")) %>%

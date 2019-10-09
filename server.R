@@ -166,6 +166,17 @@ shinyServer(function(input, output) {
                 gsub("_"," ",gsub("DECISION_","",colnames(nhb_data()%>%select(starts_with("DECISION"))))))                      
   )
   
+  output$dominance_table = renderDataTable({
+    withProgress(message = 'Loading dominance table',{
+      table = display_dominance_table(nhb_data(),input$baseline_decision)
+      datatable(table,
+                style = 'bootstrap',
+                rownames = FALSE,
+                colnames = gsub("_"," ",colnames(table)),
+                options = list(pageLength = 16, autoWidth = TRUE, dom='ftrpi')) 
+    })
+  })
+  
   output$atkinson_ede_table = renderDataTable({
     withProgress(message = 'Loading Atkinson EDE results table',{
       table = display_ede_table(nhb_data(),"Atkinson",input$baseline_decision)

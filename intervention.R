@@ -1,4 +1,5 @@
 library(tidyverse)
+library(ggpubr)
 
 calculate_post_intervention_distribution = function(intervention_data, total_intervention_cost, marginal_productivity_health, opportunity_cost_scenario){
   num_subgroups = nrow(intervention_data)
@@ -23,9 +24,10 @@ calculate_post_intervention_distribution = function(intervention_data, total_int
   }
   
   post_intervention_data = bind_cols(intervention_data,"HEALTH_OPPORTUNITY_COST"=health_opportunity_cost) %>%
-    mutate(HEALTH_OPPORTUNITY_COST=HEALTH_OPPORTUNITY_COST/POPULATION,
-           NET_HEALTH_BENEFIT=INCREMENTAL_HEALTH_BENEFIT-HEALTH_OPPORTUNITY_COST,
-           POST_INTERVENTION=BASELINE+NET_HEALTH_BENEFIT) %>%
+    mutate(NET_HEALTH_BENEFIT=INCREMENTAL_HEALTH_BENEFIT-(HEALTH_OPPORTUNITY_COST/POPULATION),
+           POST_INTERVENTION=BASELINE+NET_HEALTH_BENEFIT,
+           INCREMENTAL_HEALTH_BENEFIT=INCREMENTAL_HEALTH_BENEFIT*POPULATION,
+           NET_HEALTH_BENEFIT=NET_HEALTH_BENEFIT*POPULATION) %>%
     arrange(BASELINE) 
   
   return(post_intervention_data)
@@ -45,14 +47,16 @@ plot_intervention = function(intervention_data, total_intervention_cost, margina
     unite("LABEL",subgroup_vars,sep =":") %>%
     select(-c(POPULATION,OPPORTUNITY_COST_WEIGHTS)) %>%
     gather(key="variable",value="HALE",-c(LABEL,LEFT,RIGHT)) %>%
-    mutate(variable=gsub("_"," ",variable))
+    mutate(variable=gsub("_"," ",variable), variable=factor(variable,
+                                                            levels=c("BASELINE","POST INTERVENTION","INCREMENTAL HEALTH BENEFIT","HEALTH OPPORTUNITY COST","NET HEALTH BENEFIT"),
+                                                            labels=c("BASELINE","POST INTERVENTION","INCREMENTAL HEALTH BENEFIT","HEALTH OPPORTUNITY COST","NET HEALTH BENEFIT")))
   
-  plot = ggplot(graph_data, aes(label=LABEL)) +
+  plot1 = ggplot(graph_data %>% filter(variable %in% c("BASELINE","POST INTERVENTION")), aes(label=LABEL)) +
     geom_rect(aes(xmin=LEFT, xmax=RIGHT, ymin=0, ymax=HALE), colour="white", fill="#556B2F") +
     xlab("Proportion of Population") +
     ylab("Health Adjusted Life Expectancy at Birth") +
     geom_text(aes(x=(LEFT+RIGHT)/2, y=HALE/2), angle=90, colour="white", fontface="bold") + 
-    facet_wrap(variable~., scales = "free") +
+    facet_wrap(variable~.) +
     theme_bw() + 
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
@@ -60,6 +64,23 @@ plot_intervention = function(intervention_data, total_intervention_cost, margina
           plot.margin = unit(c(1, 1, 1, 1), "lines"),
           legend.position="none",
           text=element_text(family = "Roboto", colour = "#3e3f3a"))
+  
+  plot2 = ggplot(graph_data %>% filter(!(variable %in% c("BASELINE","POST INTERVENTION"))), aes(label=LABEL)) +
+    geom_rect(aes(xmin=LEFT, xmax=RIGHT, ymin=0, ymax=HALE), colour="white", fill="#556B2F") +
+    xlab("Proportion of Population") +
+    ylab("Population Health Adjusted Life Years") +
+    geom_text(aes(x=(LEFT+RIGHT)/2, y=HALE/2), angle=90, colour="white", fontface="bold") + 
+    facet_wrap(variable~.) +
+    theme_bw() + 
+    theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          plot.title = element_blank(),
+          plot.margin = unit(c(1, 1, 1, 1), "lines"),
+          legend.position="none",
+          text=element_text(family = "Roboto", colour = "#3e3f3a"))
+  
+  plot = ggarrange(plot1, plot2,
+                   ncol = 1, nrow = 2)
   
   return(plot)
 }
