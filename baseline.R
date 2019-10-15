@@ -105,8 +105,7 @@ baseline_health_distribution_plot = function(baseline_qale_distribution, input_v
           panel.grid.minor = element_blank(), 
           plot.title = element_blank(),
           plot.margin = unit(c(1, 1, 1, 1), "lines"),
-          legend.position="none",
-          text=element_text(family = "Roboto", colour = "#3e3f3a"))
+          legend.position="none")
   
   return(plot)
 }

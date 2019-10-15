@@ -205,8 +205,7 @@ plot_ede = function(nhb_data, index, baseline){
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
           plot.title = element_text(lineheight=.8, face="bold", hjust=0.5),
-          plot.margin = unit(c(1, 1, 1, 1), "lines"),
-          text=element_text(family = "Roboto", colour = "#3e3f3a"))
+          plot.margin = unit(c(1, 1, 1, 1), "lines"))
   
   return(plot)
 }
@@ -266,8 +265,7 @@ plot_equity_impact_plane = function(nhb_data, index, e, baseline){
     theme(panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(), 
           plot.title = element_text(lineheight=.8, face="bold", hjust=0.5),
-          plot.margin = unit(c(1, 1, 1, 1), "lines"),
-          text=element_text(family = "Roboto", colour = "#3e3f3a"))
+          plot.margin = unit(c(1, 1, 1, 1), "lines"))
   
   return(plot)
 }

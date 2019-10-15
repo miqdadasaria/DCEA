@@ -52,7 +52,7 @@ shinyUI(
                         
                         tags$div(
                           HTML("<small>
-                          <p>This site was produced by <a href='https://github.com/miqdadasaria'>Miqdad Asaria</a> 
+                          <p>This site was produced by <a href='http://www.lse.ac.uk/lse-health/people/miqdad-asaria'>Miqdad Asaria</a> 
                           <p>Source code can be found <a href='https://github.com/miqdadasaria/DCEA'>here</a>.</small>")
                         )
                       ),
@@ -118,7 +118,7 @@ shinyUI(
                         
                         tags$div(
                           HTML("<small>
-                               <p>This site was produced by <a href='https://github.com/miqdadasaria'>Miqdad Asaria</a> 
+                               <p>This site was produced by <a href='http://www.lse.ac.uk/lse-health/people/miqdad-asaria'>Miqdad Asaria</a> 
                                <p>Source code can be found <a href='https://github.com/miqdadasaria/DCEA'>here</a>.</small>")
                           )
                           ),
@@ -136,7 +136,7 @@ shinyUI(
              
              
              
-             ##### Atkinson UI panel ####
+             ##### SWF UI panel ####
              tabPanel("Evaluate Using Social Welfare Function",
                       
                       sidebarPanel(

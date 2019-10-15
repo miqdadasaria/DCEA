@@ -62,8 +62,7 @@ plot_intervention = function(intervention_data, total_intervention_cost, margina
           panel.grid.minor = element_blank(), 
           plot.title = element_blank(),
           plot.margin = unit(c(1, 1, 1, 1), "lines"),
-          legend.position="none",
-          text=element_text(family = "Roboto", colour = "#3e3f3a"))
+          legend.position="none")
   
   plot2 = ggplot(graph_data %>% filter(!(variable %in% c("BASELINE","POST INTERVENTION"))), aes(label=LABEL)) +
     geom_rect(aes(xmin=LEFT, xmax=RIGHT, ymin=0, ymax=HALE), colour="white", fill="#556B2F") +
@@ -76,8 +75,7 @@ plot_intervention = function(intervention_data, total_intervention_cost, margina
           panel.grid.minor = element_blank(), 
           plot.title = element_blank(),
           plot.margin = unit(c(1, 1, 1, 1), "lines"),
-          legend.position="none",
-          text=element_text(family = "Roboto", colour = "#3e3f3a"))
+          legend.position="none")
   
   plot = ggarrange(plot1, plot2,
                    ncol = 1, nrow = 2)
