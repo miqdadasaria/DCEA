@@ -109,7 +109,7 @@ shinyUI(
                         selectInput("opportunity_cost_scenario", 
                                     "Set opportunity cost distribution to:",
                                     list("As given in input" = "given",
-                                         "Equaly distributed" = "equal",
+                                         "Equally distributed" = "equal",
                                          "All on least healthy" = "poor",
                                          "All on most healthy" = "rich"), 
                                     selected="given"),  
